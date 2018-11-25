@@ -3,6 +3,7 @@ Matthew Ragan | matthewragan.com
 '''
 
 import sys
+import threading
 from phue import Bridge
 
 class Hue:
@@ -68,7 +69,6 @@ class Hue:
 
 		return
 
-
 	def Hue_lights(self):
 		'''
 			This is a sample method.
@@ -125,7 +125,6 @@ class Hue:
 
 		return new_brightness
 
-
 	def Convert_color(self, rgb):
 		'''
 			A hue color conversion method.
@@ -172,7 +171,6 @@ class Hue:
 
 		return color_xy
 
-
 	def Add_pars_for_lights(self):
 		'''
 			Set-up funciton for getting the lihghting parameters ready with a new device.
@@ -195,6 +193,11 @@ class Hue:
 
 		lights_page 				= parent().appendCustomPage("Individual Lights")
 
+		default_color			 	= [1.0, 1.0, 1.0]
+		default_bri					= 1
+		default_transTime			= 3
+		default_pwr					= True
+
 		# add update all pulse:
 		lights_page.appendPulse('Updatebysettings', label='Update by Settings')
 
@@ -209,22 +212,36 @@ class Hue:
 			# add a color control par
 			rgb_name 		= 'Lightcolor{}'.format(each_light[0])
 			rbg_label 		= 'Light {} Color'.format(each_light[0])
-			lights_page.appendRGB(rgb_name, label=rbg_label)
-
+			new_color 		= lights_page.appendRGB(rgb_name, label=rbg_label)
+			for each in new_color:
+				each.default 	= 1.0
+			parent().pars('Lightcolor{}r'.format(each_light[0]))[0].val = default_color[0]
+			parent().pars('Lightcolor{}g'.format(each_light[0]))[0].val = default_color[1]
+			parent().pars('Lightcolor{}b'.format(each_light[0]))[0].val = default_color[2]
+			
 			# add a brightness control par
 			bri_name 		= 'Lightbri{}'.format(each_light[0])
 			bri_label 		= 'Light {} Brightness'.format(each_light[0])
-			lights_page.appendFloat(bri_name, label=bri_label)
+			new_bri 		= lights_page.appendFloat(bri_name, label=bri_label)
+			for each in new_bri:
+				each.default = default_bri
+			parent().pars(bri_name)[0].val 	= default_bri
 
 			# add a transition time control par
 			tri_name 		= 'Lighttrans{}'.format(each_light[0])
 			tri_label 		= 'Light {} Trans Time'.format(each_light[0])
-			lights_page.appendInt(tri_name, label=tri_label)
+			new_transTime 	= lights_page.appendInt(tri_name, label=tri_label)
+			for each in new_transTime:
+				each.default = default_transTime
+			parent().pars(tri_name)[0].val 	= default_transTime
 
 			# add a power control par
 			pwr_name 		='Lightpwr{}'.format(each_light[0])
 			pwr_label 		='Light {} Power'.format(each_light[0])
-			lights_page.appendToggle(pwr_name, label=pwr_label)
+			new_pwr 		= lights_page.appendToggle(pwr_name, label=pwr_label)
+			for each in new_pwr:
+				each.default = default_pwr
+			parent().pars(pwr_name)[0].val 	= default_pwr
 
 			# add an update pulse button
 			update_name 	= 'Updatelight{}'.format(each_light[0])
