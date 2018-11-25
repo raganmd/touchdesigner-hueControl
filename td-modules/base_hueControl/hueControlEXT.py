@@ -92,44 +92,6 @@ class Hue:
 		lights 				= My_bridge.lights
 		return lights
 
-	def Set_lights(self):
-		'''
-			This is a sample method.
-			
-			This sample method is intended to help illustrate what method docstrings should look like.
-			                
-			Notes
-			---------------
-			'self' does not need to be included in the Args section.
-			
-			Args
-			---------------
-			None
-									
-			Returns
-			---------------
-			None
-		'''
-
-		My_bridge 			= Bridge(self.Bridge_ip)
-		transition 			= 10
-
-		brightness 			= 1
-
-		new_brightness 		= self.Remap_brightness(brightness)
-
-		rgb 				= op('constant1').sample(x=0,y=0)
-
-		for each in My_bridge.lights:
-			print(each)
-			each.on 				= True
-			each.transitiontime 	= transition * self.Trans_time_scaler
-			each.xy 				= self.Convert_color(rgb)
-			each.brightness 		= new_brightness
-		
-		return
-
-
 	def Remap_brightness(self, brightness):
 		'''
 			Remap values from 0-1 to 0-255.
