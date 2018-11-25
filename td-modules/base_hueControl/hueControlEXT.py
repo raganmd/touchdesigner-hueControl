@@ -413,7 +413,7 @@ class Hue:
 		print("Update all by Settings")
 		return
 
-	def Set_all_lights(self):
+	def Set_all_lights(self, debug=False):
 		'''
 			Set all Lights to uniform pars.
 			
@@ -440,7 +440,12 @@ class Hue:
 		rgb 				= self.Convert_color([chan.val for chan in parent().pars('Allcolor*')])
 
 		for each in My_bridge.lights:
-			print(each)
+			# debug line to track each light
+			if debug:
+				print(each)
+			else:
+				pass
+
 			each.on 				= parent().par.Allpower.val
 			each.transitiontime 	= transition
 			each.xy 				= rgb
