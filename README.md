@@ -25,13 +25,13 @@ This module module has some additional requirements in the from of dependencies,
 Ensure that you've installed a `Python 3.5+` variety.
 
 ### Installing Dependencies for Windows Users
-For Window's users a convenience script is provided here:
-`\dependencies\update-dep-python-windows.cmd`
+For Window's users a convenience script is provided here:  
+`\dependencies\update-dep-python-windows.cmd`  
 In order for this to operate correctly, right click and run this `.cmd` file as an Administrator. This should first ensure that your python package manager is updated, and that your additional python modules are added to a newly created directory in your project `dependencies\python`. 
 
 ### Installing Dependencies for macOS Users
-For Mac users a convenience script is provided here:
-`\dependencies\update-dep-python-mac.sh`
+For Mac users a convenience script is provided here:  
+`\dependencies\update-dep-python-mac.sh`  
 In order for this to operate correctly, open a terminal window and drag the file above into the command line. Press return / Enter to run the bash script. This should first ensure that your python package manager is updated, and that your additional python modules are added to a newly created directory in your project `dependencies\python`. 
 
 ### Connecting to the Hue Bridge
@@ -42,32 +42,53 @@ You'll need to enter the IP address of your Hue Bridge onto the component itself
 ## Parameters
 
 ### Set-up Individual Lights
+This parameter will retrieve the dictionary of lights that are currently configured on the Hue Bridge. This will then loop through all of the lights provided by the Bridge and create unique parameters for each light. Specifically it will create pars for:  
+* Color
+* Brightness
+* Transition Time
+* Power
+* Pulse to Update
+
+This gives the user the ability to control each light individual - constructing parameters for each light currently configured on a given bridge. 
 
 ### Bridge IP
+The IP address for the Hue Bridge - this is used for communicating with the lights by way of the Hue Bridge.
 
 ### All Color
+This color will be sent to all lights - you can think of this as a global color control. Color is expressed as normalized range of 0-1, with red, green, and blue channels.
 
 ### All Brightness
+Similar to color, this is the brightness control for all lights. This is expressed in a range of 0-1.
 
 ### All Trans Time
+This is the time between the issued command the settings sent to the light. This is expressed in seconds. If you enter a value of 0, the instructions will be sent immediately, though this often produces results that are stuttered.
 
 ### All Power
+This is the power command, the equivalent of "on" and "off".
 
 ### Update All
+After changing the settings for lights, you use this pulse button to send commands to the lights. This ensures that you can set the parameters before issuing a command to the lights. 
 
 ### Update by Settings
+This pulse button is on the top of the Individual Lighting control page. Unlike a global control, this will send instructions for the configuration of lights based on what's set ont this page - this in effect lets you send unique settings to each light.
 
 ### Light n Name
+This is a read only parameter that is the Name for a given light that the user has configured in one of the Hue Apps.
 
 ### Light n Color
+The color to send to a given light. Color is expressed as normalized range of 0-1, with red, green, and blue channels.
 
 ### Light n Brightness
+Similar to color, this is the brightness control a given light. This is expressed in a range of 0-1.
 
 ### Light n Trans Time
+This is the time between the issued command the settings sent to the light. This is expressed in seconds. If you enter a value of 0, the instructions will be sent immediately.
 
 ### Light n Power
+This is the power command, the equivalent of "on" and "off".
 
 ### Update n Light
+After changing the settings for a given light, you use this pulse button to send commands to the light. This ensures that you can set the parameters before issuing a command. 
 
 ## Credits
 ### Inspired by the work of:
