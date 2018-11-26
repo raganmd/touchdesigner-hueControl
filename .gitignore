@@ -3,3 +3,7 @@ dependencies/python/*
 
 # the git-pip python bits
 dependencies/python/get-pip.py
+get-pip.py
+
+# mac files
+*.DS_STORE
