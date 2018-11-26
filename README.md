@@ -1,6 +1,6 @@
 # TouchDesigner Hue Control
 *a tox for controlling phillips hue devices*  
-[matthew ragan](matthewragan.com)
+[matthew ragan](matthewragan.com)  
 [zoe sandoval](zoesandoval.com)
 
 ## TouchDesigner Version
