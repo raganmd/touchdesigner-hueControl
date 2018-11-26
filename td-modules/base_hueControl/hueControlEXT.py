@@ -22,7 +22,7 @@ class Hue:
 
 		self.My_op 				= myOp
 		self.Dep_path 			= '{}/dependencies/python/'.format(project.folder)
-		self.Bridge_ip 			= parent().par.Bridgeip.val
+		self.Bridge_ip 			= parent().par.Bridgeip
 
 		self.Brightness_from 	= (0, 1)
 		self.Brightness_to 		= (0, 255)
@@ -88,7 +88,7 @@ class Hue:
 			None
 		'''
 
-		My_bridge 			= Bridge(self.Bridge_ip)
+		My_bridge 			= Bridge(self.Bridge_ip.eval())
 		lights 				= My_bridge.lights
 		return lights
 
@@ -347,7 +347,7 @@ class Hue:
 		on_cmd 				= parent().pars('Lightpwr{}'.format(light_index))[0].val
 		bri_cmd 			= parent().pars('Lightbri{}'.format(light_index))[0].val
 		trans_cmd 			= 1 if parent().pars('Lighttrans{}'.format(light_index))[0].val == 0 else parent().pars('Lighttrans{}'.format(light_index))[0].val
-		xy_cmd 				= self.Convert_color([chan.val for chan in parent().pars('Lightcolor{}*'.format(light_index))])
+		xy_cmd 				= self.Convert_color([chan.eval() for chan in parent().pars('Lightcolor{}*'.format(light_index))])
 
 		command_dict 		= {
 			'on'				: bool(on_cmd),
@@ -385,7 +385,7 @@ class Hue:
 			None
 		'''
 
-		My_bridge 			= Bridge(self.Bridge_ip)
+		My_bridge 			= Bridge(self.Bridge_ip.eval())
 
 		command_dict 		= self.Build_command_dict(par_index)
 		light_name 			= parent().pars('Lightname{}'.format(par_index))[0].val	
@@ -421,7 +421,7 @@ class Hue:
 			None
 		'''
 
-		My_bridge 			= Bridge(self.Bridge_ip)
+		My_bridge 			= Bridge(self.Bridge_ip.eval())
 		num_lights 			= len(My_bridge.lights)
 
 		for each in range(num_lights):
@@ -450,11 +450,11 @@ class Hue:
 			---------------
 			None
 		'''
-		My_bridge 			= Bridge(self.Bridge_ip)
+		My_bridge 			= Bridge(self.Bridge_ip.eval())
 		
 		transition 			= parent().par.Alltranstime.val * self.Trans_time_scaler
 		brightness 			= self.Remap_brightness(parent().par.Allbrightness.val)
-		rgb 				= self.Convert_color([chan.val for chan in parent().pars('Allcolor*')])
+		rgb 				= self.Convert_color([chan.eval() for chan in parent().pars('Allcolor*')])
 
 		for each in My_bridge.lights:
 			# debug line to track each light
