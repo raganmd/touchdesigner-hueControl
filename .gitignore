@@ -1,2 +1,5 @@
 # dependencies
 dependencies/python/*
+
+# the git-pip python bits
+dependencies/python/get-pip.py
