@@ -12,15 +12,12 @@
 
 ## Set-up
 
-
 ## Summary
 
+## Parameters
 
-# Parameters
-
-
-# Credits
+## Credits
 ### Inspired by the work of:
-[zoe sandoval](zoesandoval.com)
-[lightnotes](https://www.lightnotes.es/)
+[zoe sandoval](zoesandoval.com)  
+[lightnotes](https://www.lightnotes.es/)  
 [forum inspiration](https://www.derivative.ca/Forum/viewtopic.php?f=4&t=6131)
