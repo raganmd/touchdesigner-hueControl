@@ -40,36 +40,6 @@ class Hue:
 		print("Hue Control Init")
 		return
 
-	def Check_dep(self):
-		'''
-			This is a sample method.
-			
-			This sample method is intended to help illustrate what method docstrings should look like.
-			                
-			Notes
-			---------------
-			'self' does not need to be included in the Args section.
-			
-			Args
-			---------------
-			None
-									
-			Returns
-			---------------
-			None
-		'''
-
-		if self.Dep_path in sys.path:
-			pass
-
-		else:
-			sys.path.append(self.Dep_path)
-
-		for each in sys.path:
-			print(each)
-
-		return
-
 	def Hue_lights(self):
 		'''
 			This is a sample method.
