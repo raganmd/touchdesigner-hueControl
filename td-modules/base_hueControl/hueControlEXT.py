@@ -140,7 +140,7 @@ class Hue:
 			Args
 			---------------
 			rgb (list)
-			> A list of rgb values to be convereted into the xy color space for the hue
+			> A list of rgb values to be converted into the xy color space for the hue
 			
 			Examples
 			---------------
@@ -174,10 +174,10 @@ class Hue:
 
 	def Add_pars_for_lights(self):
 		'''
-			Set-up funciton for getting the lihghting parameters ready with a new device.
+			Set-up function for getting the lighting parameters ready with a new device.
 			
 			This method loops through the lights that are reported by a given hue Bridge
-			and creates custom paramaters on the parent() compoent.
+			and creates custom paramaters on the parent() component.
 			                
 			Notes
 			---------------
@@ -323,7 +323,7 @@ class Hue:
 			
 			In the phue library there's a function available for setting lights
 			based on their name. This function looks to the index of the parmeter
-			that's been pulsed, and retrieves all of the reivant information to build
+			that's been pulsed, and retrieves all of the relevant information to build
 			a command list.
 			                
 			Notes
@@ -333,7 +333,7 @@ class Hue:
 			Args
 			---------------
 			light_index (int)
-			> The integer value assocaited with the custom parameter index for a light
+			> The integer value associated with the custom parameter index for a light
 						
 			Examples
 			---------------
@@ -362,7 +362,7 @@ class Hue:
 		'''
 			This is helper method for sending a set_light() command to a specific hue light.
 			
-			This method fetches the approprite light name, constructs a command list, and then
+			This method fetches the appropriate light name, constructs a command list, and then
 			sends a command to the hue bridge to set the specified light appropriately.
 			                
 			Notes
@@ -372,7 +372,7 @@ class Hue:
 			Args
 			---------------
 			par_index (int)
-			> The integer value assocaited with the custom parameter index for a light
+			> The integer value associated with the custom parameter index for a light
 			
 			debug (bool)
 			> A boolean value for toggling logged output
@@ -407,7 +407,7 @@ class Hue:
 			
 			This method uses the settings on the "Individual Lights page to set the pars for
 			all lights. This allows for a single pulse update rather than individual lighting
-			calls per light. This convience function takes advantage of other helper methods.
+			calls per light. This convenience function takes advantage of other helper methods.
 			                
 			Notes
 			---------------
