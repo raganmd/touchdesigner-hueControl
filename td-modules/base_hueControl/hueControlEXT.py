@@ -37,6 +37,8 @@ class Hue:
 		self.Lights_page_name  	= "Individual Lights"
 		self.Trans_time_scaler 	= 10
 
+		self.My_bridge 			= None
+
 		print("Hue Control Init")
 		return
 
@@ -420,44 +422,42 @@ class Hue:
 			---------------
 			None
 		'''
-		My_bridge 			= self.Bridge_ip.eval()
+		My_bridge 			= Bridge(self.Bridge_ip.eval())
 		
 		transition 			= parent().par.Alltranstime.eval() * self.Trans_time_scaler
 		brightness 			= self.Remap_brightness(parent().par.Allbrightness.eval())
-		rgb 				= [chan.eval() for chan in parent().pars('Allcolor*')]
+		rgb 				= self.Convert_color([chan.eval() for chan in parent().pars('Allcolor*')])
 		pwr 				= parent().par.Allpower.eval()
 
-		myThread            = threading.Thread(	target=self.Threaded_all_lights_worker, 
-												args=(My_bridge, pwr, transition, brightness, rgb,))
-		myThread.start()
+		for each in My_bridge.lights:
+			# debug line to track each light
+			if debug:
+				print(each)
+			else:
+				pass
 
-		# for each in My_bridge.lights:
-		# 	# debug line to track each light
-		# 	if debug:
-		# 		print(each)
-		# 	else:
-		# 		pass
-
-		# 	each.on 				= pwr
-		# 	each.transitiontime 	= transition
-		# 	each.xy 				= rgb
-		# 	each.brightness 		= brightness
+			each.on 				= pwr
+			each.transitiontime 	= transition
+			each.xy 				= rgb
+			each.brightness 		= brightness
 
 		return
 	
 	def Threaded_all_lights_worker(self, bridgeIP, pwr, transTime, bri, rbgAsXy):
+
 		My_bridge 			= Bridge(bridgeIP)
 		for each in My_bridge.lights:
 			each.on					= pwr
 			each.transitiontime 	= transTime
-			each.xy 				= self.Convert_color(rbgAsXy)
+			each.xy 				= rbgAsXy
 			each.brightness 		= bri
 
 
 		return
 
 	def Start_thread(self):
-		myThread            = threading.Thread(	target=Threaded_all_lights_worke, 
-												args=(bridgeIP, wpr, transTime, bri, rgb,))
-		myThread.start()
+		# myThread            = threading.Thread(	target=self.Threaded_all_lights_worker, 
+		# 										args=(My_bridge, pwr, transition, brightness, rgb,))
+		# myThread.start()
+		# 
 		return
