@@ -22,7 +22,7 @@ class Hue:
 	def __init__(self, myOp):
 
 		self.My_op 				= myOp
-		self.Dep_path 			= '{}/dependencies/python/'.format(project.folder)
+		self.Dep_path 			= '{}/dep/python/'.format(project.folder)
 		self.Bridge_ip 			= parent().par.Bridgeip
 
 		self.Brightness_from 	= (0, 1)
