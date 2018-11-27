@@ -1,5 +1,6 @@
 '''
 Matthew Ragan | matthewragan.com
+Zoe Sandoval | zoesandoval.com
 '''
 
 import sys
@@ -225,7 +226,7 @@ class Hue:
 			new_bri 		= lights_page.appendFloat(bri_name, label=bri_label)
 			for each in new_bri:
 				each.default = default_bri
-			parent().pars(bri_name)[0].val 	= default_bri
+			parent().pars(bri_name)[0].val		= default_bri
 
 			# add a transition time control par
 			tri_name 		= 'Lighttrans{}'.format(each_light[0])
@@ -233,7 +234,7 @@ class Hue:
 			new_transTime 	= lights_page.appendInt(tri_name, label=tri_label)
 			for each in new_transTime:
 				each.default = default_transTime
-			parent().pars(tri_name)[0].val 	= default_transTime
+			parent().pars(tri_name)[0].val 		= default_transTime
 
 			# add a power control par
 			pwr_name 		='Lightpwr{}'.format(each_light[0])
@@ -241,7 +242,7 @@ class Hue:
 			new_pwr 		= lights_page.appendToggle(pwr_name, label=pwr_label)
 			for each in new_pwr:
 				each.default = default_pwr
-			parent().pars(pwr_name)[0].val 	= default_pwr
+			parent().pars(pwr_name)[0].val 		= default_pwr
 
 			# add an update pulse button
 			update_name 	= 'Updatelight{}'.format(each_light[0])
@@ -344,9 +345,9 @@ class Hue:
 			> A dictionary with all appropriate keys for using the set_light() command
 		'''
 
-		on_cmd 				= parent().pars('Lightpwr{}'.format(light_index))[0].val
-		bri_cmd 			= parent().pars('Lightbri{}'.format(light_index))[0].val
-		trans_cmd 			= 1 if parent().pars('Lighttrans{}'.format(light_index))[0].val == 0 else parent().pars('Lighttrans{}'.format(light_index))[0].val
+		on_cmd 				= parent().pars('Lightpwr{}'.format(light_index))[0].eval()
+		bri_cmd 			= parent().pars('Lightbri{}'.format(light_index))[0].eval()
+		trans_cmd 			= 1 if parent().pars('Lighttrans{}'.format(light_index))[0].eval() == 0 else parent().pars('Lighttrans{}'.format(light_index))[0].eval()
 		xy_cmd 				= self.Convert_color([chan.eval() for chan in parent().pars('Lightcolor{}*'.format(light_index))])
 
 		command_dict 		= {
@@ -452,8 +453,8 @@ class Hue:
 		'''
 		My_bridge 			= Bridge(self.Bridge_ip.eval())
 		
-		transition 			= parent().par.Alltranstime.val * self.Trans_time_scaler
-		brightness 			= self.Remap_brightness(parent().par.Allbrightness.val)
+		transition 			= parent().par.Alltranstime.eval() * self.Trans_time_scaler
+		brightness 			= self.Remap_brightness(parent().par.Allbrightness.eval())
 		rgb 				= self.Convert_color([chan.eval() for chan in parent().pars('Allcolor*')])
 
 		for each in My_bridge.lights:
@@ -463,9 +464,13 @@ class Hue:
 			else:
 				pass
 
-			each.on 				= parent().par.Allpower.val
+			each.on 				= parent().par.Allpower.eval()
 			each.transitiontime 	= transition
 			each.xy 				= rgb
 			each.brightness 		= brightness
+
+		return
+	
+	def Thread_worker(self):
 
 		return
