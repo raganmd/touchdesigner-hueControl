@@ -239,7 +239,7 @@ class Hue:
 			                
 			Notes
 			---------------
-			None.
+			None
 			
 			Args
 			---------------
@@ -398,7 +398,6 @@ class Hue:
 		for each in range(num_lights):
 			self.Update_light_by_par_index(each)
 
-		print("Update all by Settings")
 		return
 
 	def Set_all_lights(self, debug=False):
@@ -421,26 +420,44 @@ class Hue:
 			---------------
 			None
 		'''
-		My_bridge 			= Bridge(self.Bridge_ip.eval())
+		My_bridge 			= self.Bridge_ip.eval()
 		
 		transition 			= parent().par.Alltranstime.eval() * self.Trans_time_scaler
 		brightness 			= self.Remap_brightness(parent().par.Allbrightness.eval())
-		rgb 				= self.Convert_color([chan.eval() for chan in parent().pars('Allcolor*')])
+		rgb 				= [chan.eval() for chan in parent().pars('Allcolor*')]
+		pwr 				= parent().par.Allpower.eval()
 
-		for each in My_bridge.lights:
-			# debug line to track each light
-			if debug:
-				print(each)
-			else:
-				pass
+		myThread            = threading.Thread(	target=self.Threaded_all_lights_worker, 
+												args=(My_bridge, pwr, transition, brightness, rgb,))
+		myThread.start()
 
-			each.on 				= parent().par.Allpower.eval()
-			each.transitiontime 	= transition
-			each.xy 				= rgb
-			each.brightness 		= brightness
+		# for each in My_bridge.lights:
+		# 	# debug line to track each light
+		# 	if debug:
+		# 		print(each)
+		# 	else:
+		# 		pass
+
+		# 	each.on 				= pwr
+		# 	each.transitiontime 	= transition
+		# 	each.xy 				= rgb
+		# 	each.brightness 		= brightness
 
 		return
 	
-	def Thread_worker(self):
+	def Threaded_all_lights_worker(self, bridgeIP, pwr, transTime, bri, rbgAsXy):
+		My_bridge 			= Bridge(bridgeIP)
+		for each in My_bridge.lights:
+			each.on					= pwr
+			each.transitiontime 	= transTime
+			each.xy 				= self.Convert_color(rbgAsXy)
+			each.brightness 		= bri
 
+
+		return
+
+	def Start_thread(self):
+		myThread            = threading.Thread(	target=Threaded_all_lights_worke, 
+												args=(bridgeIP, wpr, transTime, bri, rgb,))
+		myThread.start()
 		return
