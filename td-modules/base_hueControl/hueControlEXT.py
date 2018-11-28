@@ -39,6 +39,8 @@ class Hue:
 
 		self.My_bridge 			= None
 
+		self.Use_threads 		= parent().par.Usethreads
+
 		print("Hue Control Init")
 		return
 
@@ -133,14 +135,14 @@ class Hue:
 		gamma 				= self.Gamma
 		g_correction 		= [pow(each_chan, (1/gamma)) for each_chan in rgb]
 
-		color_X 			= g_correction[0] * self.X_vals[0] + g_correction[1] * self.X_vals[1] + g_correction[2] * self.X_vals[2]
-		color_Y 			= g_correction[0] * self.Y_vals[0] + g_correction[1] * self.Y_vals[1] + g_correction[2] * self.Y_vals[2]
-		color_Z 			= g_correction[0] * self.Z_vals[0] + g_correction[1] * self.Z_vals[1] + g_correction[2] * self.Z_vals[2]
+		color_X = g_correction[0] * self.X_vals[0] + g_correction[1] * self.X_vals[1] + g_correction[2] * self.X_vals[2]
+		color_Y = g_correction[0] * self.Y_vals[0] + g_correction[1] * self.Y_vals[1] + g_correction[2] * self.Y_vals[2]
+		color_Z = g_correction[0] * self.Z_vals[0] + g_correction[1] * self.Z_vals[1] + g_correction[2] * self.Z_vals[2]
 
-		color_x 			= color_X / (color_X + color_Y + color_Z)
-		color_y 			= color_Y / (color_X + color_Y + color_Z)
+		color_x = color_X / (color_X + color_Y + color_Z)
+		color_y = color_Y / (color_X + color_Y + color_Z)
 
-		color_xy 			= [color_x, color_y]
+		color_xy = [color_x, color_y]
 
 		return color_xy
 
@@ -366,7 +368,18 @@ class Hue:
 		command_dict 		= self.Build_command_dict(par_index)
 		light_name 			= parent().pars('Lightname{}'.format(par_index))[0].val
 
-		My_bridge.set_light(light_name, command_dict)
+		# threaded approach
+		if self.Use_threads:
+			myThread        = threading.Thread(	target=self.Threaded_light_worker,
+												args=(	self.Bridge_ip.eval(),
+														light_name,
+														command_dict,))
+			myThread.start()
+
+		# non-threaded approach			
+		else:
+			My_bridge.set_light(light_name, command_dict)
+
 
 		if debug:
 			print("light name | ", light_name)
@@ -432,22 +445,97 @@ class Hue:
 		rgb 				= self.Convert_color([chan.eval() for chan in parent().pars('Allcolor*')])
 		pwr 				= parent().par.Allpower.eval()
 
-		for each in My_bridge.lights:
-			# debug line to track each light
-			if debug:
-				print(each)
-			else:
-				pass
+		# use the threaded approach for looping through all lights 
+		if self.Use_threads:
+			myThread            = threading.Thread(	target=self.Threaded_all_lights_worker,
+													args=( self.Bridge_ip.eval(),
+															pwr, 
+															transition, 
+															brightness, 
+															rgb,))
+			myThread.start()			
 
-			each.on 				= pwr
-			each.transitiontime 	= transition
-			each.xy 				= rgb
-			each.brightness 		= brightness
+		else:
+			for each in My_bridge.lights:
+				# debug line to track each light
+				if debug:
+					print(each)
+				else:
+					pass
+				
+				# send commands to each light
+				each.on 				= pwr
+				each.transitiontime 	= transition
+				each.xy 				= rgb
+				each.brightness 		= brightness
 
 		return
 
-	def Threaded_all_lights_worker(self, bridgeIP, pwr, transTime, bri, rbgAsXy):
 
+	def Threaded_light_worker(self, bridgeIP, light, command_dict):
+		'''
+			Threaded loop for changing all lights.
+
+			This method uses the parameters set on the "All Lights" page to send commands to all
+			hue lights at the same time. This assumes you would like to control all lights in the
+			same fashion - as a single group.
+
+			Notes
+			---------------
+			None
+
+			Args
+			---------------
+			bridgeIP(str)
+			>
+
+			light(str)
+			>
+
+			command(dict)
+			>
+
+			Returns
+			---------------
+			None
+		'''
+		My_bridge 			= Bridge(bridgeIP)
+		My_bridge.set_light(light, command_dict)
+		return
+
+	def Threaded_all_lights_worker(self, bridgeIP, pwr, transTime, bri, rbgAsXy):
+		'''
+			Threaded loop for changing all lights.
+
+			This method uses the parameters set on the "All Lights" page to send commands to all
+			hue lights at the same time. This assumes you would like to control all lights in the
+			same fashion - as a single group.
+
+			Notes
+			---------------
+			None
+
+			Args
+			---------------
+			bridgeIP(str)
+			>
+
+			pwr(bool)
+			>
+
+			transTime(float)
+			>
+
+			bri(int)
+			>
+
+			rgbAsXy(list)
+			>
+
+			Returns
+			---------------
+			None
+		'''
 		My_bridge 			= Bridge(bridgeIP)
 		for each in My_bridge.lights:
 			each.on					= pwr
