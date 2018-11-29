@@ -26,12 +26,12 @@ Ensure that you've installed a `Python 3.5+` variety.
 
 ### Installing Dependencies for Windows Users
 For Window's users a convenience script is provided here:  
-`\dependencies\update-dep-python-windows.cmd`  
+`\dev\dep\update-dep-python-windows.cmd`  
 In order for this to operate correctly, right click and run this `.cmd` file as an Administrator. This should first ensure that your python package manager is updated, and that your additional python modules are added to a newly created directory in your project `dependencies\python`. 
 
 ### Installing Dependencies for macOS Users
 For Mac users a convenience script is provided here:  
-`\dependencies\update-dep-python-mac.sh`  
+`\dev\dep\update-dep-python-mac.sh`  
 In order for this to operate correctly, open a terminal window and drag the file above into the command line. Press return / Enter to run the bash script. This should first ensure that your python package manager is updated, and that your additional python modules are added to a newly created directory in your project `dependencies\python`. 
 
 ### Connecting to the Hue Bridge
