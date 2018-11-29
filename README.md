@@ -107,3 +107,6 @@ After changing the settings for a given light, you use this pulse button to send
 [zoe sandoval](zoesandoval.com)  
 [lightnotes](https://www.lightnotes.es/)  
 [forum inspiration](https://www.derivative.ca/Forum/viewtopic.php?f=4&t=6131)
+
+### Icons
+[Material Design Icons by Google](https://material.io/tools/icons/?icon=save_alt&style=baseline)
