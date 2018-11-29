@@ -1,8 +1,10 @@
 # dependencies
-dep/python/*
+dev/dep/python/*
+release/dep/python/*
 
 # the git-pip python bits
-dependencies/python/get-pip.py
+dev/dep/python/get-pip.py
+release/dep/python/get-pip.py
 get-pip.py
 
 # mac files
