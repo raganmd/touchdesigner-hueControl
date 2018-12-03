@@ -1,16 +1,35 @@
-base_save 		= op('base_hueControl')
-version 		= op('table_version')[0,0].val
-reset_color 	= (0.545, 0.545, 0.545)
-save_loc 		= '../release/base_hueControl.tox'
-ext_file 		= 'hueControlEXT'
+base_ext_tox 		= op('base_hueControl')
+version 		    = op('table_version')[0,0].val
+reset_color 	    = (0.545, 0.545, 0.545)
+save_loc 		    = '../release/base_hueControl.tox'
+ext_file 		    = 'hueControlEXT'
+
+destroy_ops         = [ 'svg_icon',
+                      'transform1'
+                     ]
 
 # save tox
-base_save.par.Version 					= version
-base_save.op(ext_file).par.file 		= ''
-base_save.op(ext_file).par.loadonstart = False
-base_save.par.externaltox 				= ''
-base_save.color 						= reset_color
-base_save.op('null_icon').lock 			= True
-base_save.op('svg_icon').destroy()
-base_save.op('transform1').destroy()
-base_save.save(save_loc)
+# set version
+base_ext_tox.par.Version 					= version
+
+# remove path par for ext
+base_ext_tox.op(ext_file).par.file 		= ''
+
+# turn off loading on start
+base_ext_tox.op(ext_file).par.loadonstart = False
+
+# remove path for extenral tox
+base_ext_tox.par.externaltox 				= ''
+
+# set the color to something neutral
+base_ext_tox.color 						= reset_color
+
+# lock the tox for the icon
+base_ext_tox.op('null_icon').lock 			= True
+
+# destroy all dev ops
+for each in destroy_ops:
+    base_ext_tox.op(each).destroy()
+
+# save the tox
+base_ext_tox.save(save_loc)
