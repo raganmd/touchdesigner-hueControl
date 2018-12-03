@@ -4,19 +4,20 @@ reset_color 	    = (0.545, 0.545, 0.545)
 save_loc 		    = '../release/base_hueControl.tox'
 ext_file 		    = 'hueControlEXT'
 
+ext_ops             = base_ext_tox.findChildren(tags=['EXT', 'MOD'])
+
 destroy_ops         = [ 'svg_icon',
-                      'transform1'
-                     ]
+                      'transform1']
 
 # save tox
 # set version
 base_ext_tox.par.Version 					= version
 
-# remove path par for ext
-base_ext_tox.op(ext_file).par.file 		= ''
-
-# turn off loading on start
-base_ext_tox.op(ext_file).par.loadonstart = False
+for each in ext_ops:
+    # remove path par for ext
+    each.par.file                       = ''
+    # turn off loading on start
+    each.par.loadonstart                = False
 
 # remove path for extenral tox
 base_ext_tox.par.externaltox 				= ''

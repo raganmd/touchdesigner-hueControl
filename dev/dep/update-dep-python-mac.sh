@@ -1,22 +1,24 @@
-#!/bin/bash 
 
-dep=$(dirname "$0")
-pythonDir=/python
+# #!/bin/bash 
 
-# change current direcotry to where the script is run from
-dirname "$(readlink -f "$0")"
+# dep=$(dirname "$0")
+# pythonDir=/python
 
-# permission to run the file
-sudo chmod 755 udpate-dep-python-mac.sh
+# # change current direcotry to where the script is run from
+# dirname "$(readlink -f "$0")"
 
-# fix up pip with python3
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python3 get-pip.py
+# # permission to run the file
+# sudo chmod 755 udpate-dep-python-mac.sh
 
-# Update dependencies
+# # fix up pip with python3
+# curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+# python3 get-pip.py
 
-# make sure pip is up to date
-python3 -m pip install --upgrade pip
+# # Update dependencies
 
-# pull phue
-python3 -m pip install --target=$dep$pythonDir phue
+# # make sure pip is up to date
+# python3 -m pip install --upgrade pip
+
+# # pull phue
+# python3 -m pip install --target=$dep$pythonDir phue
+# 
