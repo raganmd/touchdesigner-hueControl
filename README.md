@@ -102,6 +102,18 @@ This is the power command, the equivalent of "on" and "off".
 #### Update n Light
 After changing the settings for a given light, you use this pulse button to send commands to the light. This ensures that you can set the parameters before issuing a command. 
 
+## Known Issues
+### mac OS
+* scripting to pull python dependencies is still misbehaving. Currently, you'll need to set the permissions on this file manually in order to get it to run correctly. You can do this in terminal by doing the following:
+    * open a terminal window
+    * navigate in terminal to the `dep` directory
+    * use the following command `sudo chmod 755 udpate-dep-python-mac.sh`
+    * enter your password
+    * drag `udpate-dep-python-mac.sh` file into terminal and hit enter
+
+## Windows
+* none that I know of... yet
+
 ## Credits
 ### Inspired by the work of:
 [zoe sandoval](zoesandoval.com)  
