@@ -54,6 +54,8 @@ def Check_dep_path():
 	'''
  
 	Dep_path 		= '{}/dep'.format(project.folder)
+	requirements 	= '{}/dep/requirements.txt'.format(project.folder)
+	reqs_dat 		= op('reqs')
 	phue_path 		= '{}/dep/python/phue.py'.format(project.folder)
 	win_py_dep 		= '{}/dep/update-dep-python-windows.cmd'.format(project.folder)
 	mac_py_dep 		= '{}/dep/update-dep-python-mac.sh'.format(project.folder)
@@ -65,19 +67,28 @@ def Check_dep_path():
 	else:
 		os.mkdir(Dep_path)
 
+	# check to see if the requirements txt is in place
+	if os.path.isfile(requirements):
+		pass
+	else:
+		reqs_file 	= open(requirements, 'w')
+		reqs_file.write(reqs_dat.text)
+		reqs_file.close()
+
 	# check to see if our requirements elements are in place
 	has_win_py 		= os.path.isfile(win_py_dep)
 	has_mac_py 		= os.path.isfile(mac_py_dep)
 
-	win_py_txt 		= me.mod.extHelperMOD.win_dep()
+	win_py_txt 		= me.mod.extHelperMOD.win_dep(project.folder + '/dep')
 	mac_py_txt 		= me.mod.extHelperMOD.mac_dep()
 
 	if has_win_py and has_mac_py:
 		pass
+
 	else:
-		win_file 	= open(win_py_dep, 'w')
-		win_file.write(win_py_txt)
-		win_file.close()
+		req_file 	= open(win_py_dep, 'w')
+		req_file.write(win_py_txt)
+		req_file.close()		
 
 		mac_file 	= open(mac_py_dep, 'w')
 		mac_file.write(mac_py_txt)
@@ -91,7 +102,7 @@ def Check_dep_path():
 		if os.path.isfile(phue_path):
 			pass
 		else:
-			subprocess.Popen([win_py_dep])
+			subprocess.Popen([win_py_dep])	
 	
 	elif osPlatform == "Darwin":
 		if os.path.isfile(phue_path):
@@ -103,17 +114,18 @@ def Check_dep_path():
 
 	return
 
-def win_dep():
-    win_txt = '''
-:: Update dependencies
+def win_dep(requirementsPath):
+	win_txt = ''':: Update dependencies
 
 :: make sure pip is up to date
 python -m pip install --upgrade pip
 
-:: pull phue
-pip install --target="%~dp0\python" phue'''
+:: install requirements
+pip install -r {}/requirements.txt --target="%~dp0\python"'''
 
-    return win_txt
+	formatted_win_txt = win_txt.format(requirementsPath)
+	
+	return formatted_win_txt
 
 def mac_dep():
     mac_txt = '''
@@ -137,7 +149,7 @@ python3 get-pip.py
 # make sure pip is up to date
 python3 -m pip install --upgrade pip
 
-# pull phue
-python3 -m pip install --target=$dep$pythonDir phue
+# install requirements
+python3 -m pip install -r requirements.txt --target=$dep$pythonDir
 '''
     return mac_txt
