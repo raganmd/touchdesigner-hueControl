@@ -2,6 +2,9 @@ import os
 import subprocess
 import platform
 
+def getTDPython():
+	return f'{app.binFolder}/python.exe'
+
 def Check_dep(debug=False):
 	'''
 		Check for dependencies and project path.
@@ -70,10 +73,12 @@ def Install_python_external():
 		None
 	'''
  
+	TDPython 			= getTDPython()
+
 	dep_path 			= '{}/dep'.format(project.folder)
 	python_path 		= '{}/dep/python'.format(project.folder)
 	scripts_reqs_path 	= '{proj}/dep/{name}'.format(proj=project.folder, name=parent().par.Name)
-	requirements 		= '{}/requirements.txt'.format(scripts_reqs_path)
+	requirements 		= '{}/requirements.txt'.format(dep_path)
 	reqs_dat 			= op('reqs')
 	win_py_dep 			= '{}/update-dep-python-windows.cmd'.format(scripts_reqs_path)
 	mac_py_dep 			= '{}/update-dep-python-mac.sh'.format(scripts_reqs_path)
@@ -92,12 +97,12 @@ def Install_python_external():
 	else:
 		os.mkdir(python_path)
 
- 	# check to see if there's a scripts and requirements folder
-	if os.path.isdir(scripts_reqs_path):
-		pass
-	# create the direcotry if it's not there
-	else:
-		os.mkdir(scripts_reqs_path)
+ # 	# check to see if there's a scripts and requirements folder
+	# if os.path.isdir(scripts_reqs_path):
+	# 	pass
+	# # create the direcotry if it's not there
+	# else:
+	# 	os.mkdir(scripts_reqs_path)
 
 	# check to see if the requirements txt is in place
 	if os.path.isfile(requirements):
@@ -107,31 +112,30 @@ def Install_python_external():
 		reqs_file.write(reqs_dat.text)
 		reqs_file.close()
 
-	# check to see if our auto-generaetd scripts are in place
-	has_win_py 		= os.path.isfile(win_py_dep)
-	has_mac_py 		= os.path.isfile(mac_py_dep)
+	# # check to see if our auto-generaetd scripts are in place
+	# has_win_py 		= os.path.isfile(win_py_dep)
+	# has_mac_py 		= os.path.isfile(mac_py_dep)
 
-	win_py_txt 		= me.mod.extHelperMOD.win_dep(scripts_reqs_path, python_path)
-	mac_py_txt 		= me.mod.extHelperMOD.mac_dep(scripts_reqs_path, python_path)
+	# win_py_txt 		= me.mod.extHelperMOD.win_dep(scripts_reqs_path, python_path)
+	# mac_py_txt 		= me.mod.extHelperMOD.mac_dep(scripts_reqs_path, python_path)
 
 	# identify platform
 	osPlatform 		= platform.system()
 
 	# on windows
 	if osPlatform == "Windows":
-		# create the script to handle grabbing our dependencies
-		req_file 	= open(win_py_dep, 'w')
-		req_file.write(win_py_txt)
-		req_file.close()
+		# upgrade pip
+		win_target_path = python_path.replace('/', '\\')
+		win_reqs_path 	= requirements.replace('/', '\\')
+		target_path 	= f'--target={win_target_path}'
+		reqs_path 		= f'{win_reqs_path}'
 
-		# check to see if there is anything in the python dep dir
-		# for now we'll assume that if there are files here we
-		# successfully installed our python dependencies
-		if len(os.listdir(python_path)) == 0:
-			subprocess.Popen([win_py_dep])
+		upgardeArgs = ['py', '-3.7', '-m', 'pip', 'install', '--user', '--upgrade', 'pip']
 
-		else:
-			pass				
+		pipArgs = ['py', '-3.7', '-m', 'pip', 'install', '-r', reqs_path, target_path]
+		print(pipArgs)
+		subprocess.Popen(pipArgs)
+			
 	# on mac
 	elif osPlatform == "Darwin":
 		# create the script to handle grabbing our dependencies
@@ -187,10 +191,11 @@ def win_dep(requirementsPath, targetPath):
 	win_txt = ''':: Update dependencies
 
 :: make sure pip is up to date
-python -m pip install --user --upgrade pip
+py -3.7 -m pip install --user --upgrade pip
 
 :: install requirements
-pip install -r {reqs}/requirements.txt --target="{target}"'''
+py -3.7 -m pip install -r {reqs}/requirements.txt --target="{target}
+timeout 30"'''
 
 	formatted_win_txt = win_txt.format(reqs=requirementsPath, target=targetPath)
 	
@@ -233,14 +238,14 @@ dirname "$(readlink -f "$0")"
 
 # fix up pip with python3
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python3 get-pip.py
+py -3.7 get-pip.py
 
 # Update dependencies
 
 # make sure pip is up to date
-python3 -m pip install --user --upgrade pip
+py -3.7 -m pip install --user --upgrade pip
 
 # install requirements
-python3 -m pip install -r {reqs}/requirements.txt --target={target}'''
+py -3.7 -m pip install -r {reqs}/requirements.txt --target={target}'''
 	formatted_mac_txt = mac_txt.format(reqs=requirementsPath, target=targetPath)
 	return formatted_mac_txt
