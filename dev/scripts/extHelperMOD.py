@@ -130,9 +130,9 @@ def Install_python_external():
 		target_path 	= f'--target={win_target_path}'
 		reqs_path 		= f'{win_reqs_path}'
 
-		upgardeArgs = ['py', '-3.7', '-m', 'pip', 'install', '--user', '--upgrade', 'pip']
+		upgardeArgs = ['py', '-3.9', '-m', 'pip', 'install', '--user', '--upgrade', 'pip']
 
-		pipArgs = ['py', '-3.7', '-m', 'pip', 'install', '-r', reqs_path, target_path]
+		pipArgs = ['py', '-3.9', '-m', 'pip', 'install', '-r', reqs_path, target_path]
 		print(pipArgs)
 		subprocess.Popen(pipArgs)
 			
@@ -191,10 +191,10 @@ def win_dep(requirementsPath, targetPath):
 	win_txt = ''':: Update dependencies
 
 :: make sure pip is up to date
-py -3.7 -m pip install --user --upgrade pip
+py -3.9 -m pip install --user --upgrade pip
 
 :: install requirements
-py -3.7 -m pip install -r {reqs}/requirements.txt --target="{target}
+py -3.9 -m pip install -r {reqs}/requirements.txt --target="{target}
 timeout 30"'''
 
 	formatted_win_txt = win_txt.format(reqs=requirementsPath, target=targetPath)
@@ -238,14 +238,14 @@ dirname "$(readlink -f "$0")"
 
 # fix up pip with python3
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-py -3.7 get-pip.py
+py -3.9 get-pip.py
 
 # Update dependencies
 
 # make sure pip is up to date
-py -3.7 -m pip install --user --upgrade pip
+py -3.9 -m pip install --user --upgrade pip
 
 # install requirements
-py -3.7 -m pip install -r {reqs}/requirements.txt --target={target}'''
+py -3.9 -m pip install -r {reqs}/requirements.txt --target={target}'''
 	formatted_mac_txt = mac_txt.format(reqs=requirementsPath, target=targetPath)
 	return formatted_mac_txt

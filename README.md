@@ -22,7 +22,7 @@ This TOX provides global control for all lights, or individual control for singl
 This module module has some additional requirements in the from of dependencies, as well as some set-up requirements for working with hue devices. To begin we need to ensure that we've collected all of the requisite external dependencies
 
 ### Install Python3
-Ensure that you've installed a `Python 3.5+` variety.
+Ensure that you've installed a `Python 3.9` variety.
 
 ### Installing Dependencies for Windows Users
 For Window's users a convenience script is provided here:  
