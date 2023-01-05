@@ -9,46 +9,47 @@ import json
 import requests
 import TDFunctions
 
-class Hue:
+class TDHueController:
     '''
-        This is a sample class.
+    TDHueController is intended to construct and send web
+    requests to a Hue Bridge. This heavily leverages the requests 
+    library that ships with a default installation of TouchDesigner
+    removing a third party integration requirement. This reduces 
+    reliance on outside development and the challenges of managing
+    third party libraries with TouchDesigner. 
 
-        This sample class has several important features that can be described here.
-
-
-        Notes
-        ---------------
-        Your notes about the class go here
-     '''
+    Notes
+    ---------------
+    N/A
+    '''
 
     def __init__(self, myOp:OP) -> None:
 
         self.My_op = myOp
-        self.Dep_path = '{}/dep/python/'.format(project.folder)
-        self.Bridge_ip = parent().par.Bridgeip
+        self.Bridge_ip = myOp.par.Bridgeip
 
-        self.Brightness_from = (0, 1)
-        self.Brightness_to = (0, 255)
-
-        self.Gamma = .75
-
-        self.X_vals	= (0.664511, 0.154324, 0.162028)
-        self.Y_vals = (0.283881, 0.668433, 0.047685)
-        self.Z_vals	= (0.000088, 0.072310, 0.986039)
+        self.Gamma = None
+        self.X_vals	= None
+        self.Y_vals = None
+        self.Z_vals	= None
 
         self.Lights_page_name = "Individual Lights"
         self.Trans_time_scaler = 10
 
         self.My_bridge = None
 
-        self.Use_threads  = parent().par.Usethreads
+        self.Use_threads  = myOp.par.Usethreads
 
         self._all_lights = None
+
+        # runs additional setup to get par vals
+        self._setup()
 
         self._get_lights()
 
         print("Hue Control Init")
         return
+
 
     @property
     def _bridge_address(self) -> str:
@@ -70,7 +71,24 @@ class Hue:
             "Host" : "10.0.1.60"}
         return hue_headers
 
-    def _setup(self) -> list:
+    def _setup(self) -> None:
+        self.Gamma = self.My_op.par.Gamma.eval()
+        self.X_vals = (
+            self.My_op.par.Xvals1.eval(), 
+            self.My_op.par.Xvals2.eval(), 
+            self.My_op.par.Xvals3.eval())
+        
+        self.Y_vals = (
+            self.My_op.par.Yvals1.eval(), 
+            self.My_op.par.Yvals2.eval(), 
+            self.My_op.par.Yvals3.eval())
+        
+        self.Z_vals = (
+            self.My_op.par.Zvals1.eval(), 
+            self.My_op.par.Zvals2.eval(), 
+            self.My_op.par.Zvals3.eval())
+
+    def _bridge_setup(self) -> list:
         '''Runs set-up functions to connect with bridge
         '''
         api_address = self._api_address
@@ -78,11 +96,12 @@ class Hue:
             "devicetype": "TouchDesigner", 
             "generateclientkey":True
             }
+
         set_up_msg = requests.post(api_address, json=payload, verify=False)
         
         if set_up_msg.status_code == 200:
             json_blob = set_up_msg.json()
-            print(json_blob)
+
             try:
                 # set username and application key on hue op
                 success_blob = json_blob[0].get("success")
@@ -130,8 +149,13 @@ class Hue:
             None
         '''
 
+        # clear old lights
         self.Clear_hue_lights()
-        self.Add_pars_for_lights()
+
+        # # wait 1 second and add new pars
+        delay_add_pars = "args[0].Add_pars_for_lights()"
+        run(delay_add_pars, self, delayFrames=60)
+
 
     def Clear_hue_lights(self):
         '''
@@ -154,15 +178,13 @@ class Hue:
         '''
 
         # delete the whole page of custom pars
-        try:
-            parent().customPages[2].destroy()
-
-        except:
-            pass
-
-        # add the page back onto the COMP
-        parent().appendCustomPage(self.Lights_page_name)			
-
+        light_pars = self.My_op.customPars
+        for each_light in light_pars:
+            try:
+                if each_light.page == self.Lights_page_name and each_light.name != "Updatebysettings":
+                    each_light.destroy()
+            except Exception as e:
+                pass
 
     def Add_pars_for_lights(self) -> None:
         '''
@@ -184,7 +206,7 @@ class Hue:
             None
         '''
 
-        lights_page = parent().appendCustomPage("Individual Lights")
+        lights_page = self.My_op.appendCustomPage("Individual Lights")
 
         # add update all pulse:
         lights_page.appendPulse('Updatebysettings', label='Update by Settings')
@@ -208,14 +230,15 @@ class Hue:
         default_transTime = 3
         default_pwr = True
 
-        lights_page = TDFunctions.getCustomPage(parent(), "Individual Lights")
+        lights_page = TDFunctions.getCustomPage(self.My_op, "Individual Lights")
 
         # add the string name of the light
         str_name = f'Lightname{index}'
         str_label = f'Light {index} Name'
         lights_page.appendStr(str_name, label=str_label)
 
-        light_id_name = f'Light{index}id'
+        # add id of light
+        light_id_name = f'Lightid{index}'
         light_id_label = f'Light {index} ID'
         par_light_id = lights_page.appendStr(light_id_name, label=light_id_label)
         par_light_id.val = light_info.get("id")
@@ -229,9 +252,9 @@ class Hue:
         for each in new_color:
             each.default 	= 1.0
 
-        parent().par[f'Lightcolor{index}r'] = default_color[0]
-        parent().par[f'Lightcolor{index}g'] = default_color[1]
-        parent().par[f'Lightcolor{index}b'] = default_color[2]
+        self.My_op.par[f'Lightcolor{index}g'] = default_color[1]
+        self.My_op.par[f'Lightcolor{index}b'] = default_color[2]
+        self.My_op.par[f'Lightcolor{index}r'] = default_color[0]
 
         # add a brightness control par
         bri_name = f'Lightbri{index}'
@@ -241,7 +264,7 @@ class Hue:
         for each in new_bri:
             each.default = default_bri
 
-        parent().par[bri_name] = default_bri
+        self.My_op.par[bri_name] = default_bri
 
         # add a transition time control par
         tri_name = f'Lighttrans{index}'
@@ -251,7 +274,7 @@ class Hue:
         for each in new_transTime:
             each.default = default_transTime
         
-        parent().par[tri_name] = default_transTime
+        self.My_op.par[tri_name] = default_transTime
 
         # add a power control par
         pwr_name =f'Lightpwr{index}'
@@ -261,7 +284,7 @@ class Hue:
         for each in new_pwr:
             each.default = default_pwr
         
-        parent().par[pwr_name] = default_pwr
+        self.My_op.par[pwr_name] = default_pwr
 
         # add an update pulse button
         update_name = f'Updatelight{index}'
@@ -269,13 +292,13 @@ class Hue:
         lights_page.appendPulse(update_name, label=update_label)
 
         # set string name for lights based on Hue
-        parent().par[f'Lightname{index}'] = metadata.get("name")
+        self.My_op.par[f'Lightname{index}'] = metadata.get("name")
 
         # set par to be readonly
-        parent().par[f'Lightname{index}'].readOnly = True
+        self.My_op.par[f'Lightname{index}'].readOnly = True
 
         # add section divider
-        parent().par[f'Lightname{index}'].startSection = True
+        self.My_op.par[f'Lightname{index}'].startSection = True
 
     def _update_single_light(self, light_id:str, rgb:tuple, brightness:int) -> callable:
 
@@ -350,27 +373,3 @@ class Hue:
         color_xy = [color_x, color_y]
 
         return color_xy
-
-    def Hue_lights(self) -> list:
-        '''
-            This is a sample method.
-
-            This sample method is intended to help illustrate what method docstrings should look like.
-
-            Notes
-            ---------------
-            'self' does not need to be included in the Args section.
-
-            Args
-            ---------------
-            None
-
-            Returns
-            ---------------
-            None
-        '''
-
-        My_bridge 			= Bridge(self.Bridge_ip.eval())
-        lights 				= My_bridge.lights
-        return lights
-
