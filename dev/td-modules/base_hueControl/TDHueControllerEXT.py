@@ -8,6 +8,7 @@ import threading
 import json
 import requests
 import TDFunctions
+import urllib3
 
 class TDHueController:
     '''
@@ -24,7 +25,7 @@ class TDHueController:
     '''
 
     def __init__(self, myOp:OP) -> None:
-
+        urllib3.disable_warnings()
         self.My_op = myOp
         self.Bridge_ip = myOp.par.Bridgeip
 
@@ -47,7 +48,7 @@ class TDHueController:
 
         self._get_lights()
 
-        print("Hue Control Init")
+        print("💡 TDHue Controller Init")
         return
 
 
@@ -211,24 +212,24 @@ class TDHueController:
         # add update all pulse:
         lights_page.appendPulse('Updatebysettings', label='Update by Settings')
 
-        if self._all_lights == None:
-            self._get_lights() 
-        else:
-            pass
-
+        self._get_lights() 
         all_lights = self._all_lights
 
         for each_index, each_light in enumerate(all_lights):
-            print(each_light, each_index)
             self._add_light_pars(each_index, each_light)
-    
+
     def _add_light_pars(self, index:int, light_info:dict) -> None:
-        metadata = light_info.get("metadata")
+        metadata = light_info.get('metadata')
+        brightness = light_info.get('dimming').get('brightness') / 100
+        color = light_info.get('color').get('xy')
+        on_state = light_info.get('on').get('on')
+
+        rgb_color = self._convert_xy_to_rgb(color.get('x'), color.get('y'), brightness)
 
         default_color = [1.0, 1.0, 1.0]
         default_bri	= 1
         default_transTime = 3
-        default_pwr = True
+        default_pwr = False
 
         lights_page = TDFunctions.getCustomPage(self.My_op, "Individual Lights")
 
@@ -252,39 +253,32 @@ class TDHueController:
         for each in new_color:
             each.default 	= 1.0
 
-        self.My_op.par[f'Lightcolor{index}g'] = default_color[1]
-        self.My_op.par[f'Lightcolor{index}b'] = default_color[2]
-        self.My_op.par[f'Lightcolor{index}r'] = default_color[0]
+        self.My_op.par[f'Lightcolor{index}r'] = rgb_color[0]
+        self.My_op.par[f'Lightcolor{index}g'] = rgb_color[1]
+        self.My_op.par[f'Lightcolor{index}b'] = rgb_color[2]
 
         # add a brightness control par
         bri_name = f'Lightbri{index}'
         bri_label = f'Light {index} Brightness'
         new_bri = lights_page.appendFloat(bri_name, label=bri_label)
-
-        for each in new_bri:
-            each.default = default_bri
-
-        self.My_op.par[bri_name] = default_bri
+        new_bri.default = default_bri
+        # set with current brightness
+        self.My_op.par[bri_name] = brightness
 
         # add a transition time control par
         tri_name = f'Lighttrans{index}'
         tri_label = f'Light {index} Trans Time'
         new_transTime = lights_page.appendInt(tri_name, label=tri_label)
-        
-        for each in new_transTime:
-            each.default = default_transTime
-        
+        new_transTime.default = default_transTime        
         self.My_op.par[tri_name] = default_transTime
 
         # add a power control par
         pwr_name =f'Lightpwr{index}'
         pwr_label =f'Light {index} Power'
         new_pwr = lights_page.appendToggle(pwr_name, label=pwr_label)
-        
-        for each in new_pwr:
-            each.default = default_pwr
-        
-        self.My_op.par[pwr_name] = default_pwr
+        new_pwr.default = default_pwr
+        # set with current state
+        self.My_op.par[pwr_name] = on_state
 
         # add an update pulse button
         update_name = f'Updatelight{index}'
@@ -300,10 +294,18 @@ class TDHueController:
         # add section divider
         self.My_op.par[f'Lightname{index}'].startSection = True
 
-    def _update_single_light(self, light_id:str, rgb:tuple, brightness:int) -> callable:
+    def Update_light(self, light_id:str, rgb:list, on_state:bool, brightness:float) -> callable:
+        update_request = self._update_single_light(
+            light_id, 
+            rgb, 
+            on_state, 
+            brightness * 100)
+
+        return update_request
+        
+    def _update_single_light(self, light_id:str, rgb:tuple, on_state:bool, brightness:int) -> callable:
 
         xy_color = self._convert_color(rgb)
-        light_on = True if brightness > 0 else False
         light_params = { 
             "color" : {
                 "xy" : {
@@ -312,7 +314,7 @@ class TDHueController:
                 }
             },
             "on" : {
-                "on" : light_on
+                "on" : on_state
             },
             "dimming" : {
                 "brightness" : brightness
@@ -373,3 +375,17 @@ class TDHueController:
         color_xy = [color_x, color_y]
 
         return color_xy
+    
+    def _convert_xy_to_rgb(self, x:float, y:float, brightness:float) -> list:
+
+        z = 1.0 - x - y
+
+        Y = 0.75
+        X = (Y / y) * x
+        Z = (Y / y) * z 
+        
+        r = X  * 1.612 - Y * 0.203 - Z * 0.302 
+        g = -X * 0.509 + Y * 1.412 + Z * 0.066
+        b = X  * 0.026 - Y * 0.072 + Z * 0.962
+
+        return [r, g, b]

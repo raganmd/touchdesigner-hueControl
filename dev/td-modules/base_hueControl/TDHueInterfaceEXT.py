@@ -32,7 +32,7 @@ class TDHueInterface:
     def Parse_par_exec(self, par:callable) -> None:
         try:
             if "Light" in par.name:
-                func = getattr(self.My_op, par.name[:-1])
+                func = getattr(self.My_op, tdu.base(par.name))
                 func(par)
             
             else:
@@ -99,20 +99,36 @@ then click okay
 
     def Lightcolor(self, par:callable) -> None:
         # par group rgb
+        self._update_hue_light(par)
         print(f"running {par.name}")
 
     def Lightbri(self, par:callable) -> None:
         # float par
+        self._update_hue_light(par)
         print(f"running {par.name}")
 
     def Lighttrans(self, par:callable) -> None:
         # float par
+        self._update_hue_light(par)
         print(f"running {par.name}")
 
     def Lightpwr(self, par:callable) -> None:
         # toggle par
+        self._update_hue_light(par)
         print(f"running {par.name}")
 
     def Updatelight(self, par:callable) -> None:
         # pulse par
         print(f"running {par.name}")
+
+    def _update_hue_light(self, par:callable) -> None:
+        light_digit = tdu.digits(par.name)
+        light_id = self.My_op.par[f'Lightid{light_digit}'].eval()
+        rgb = [
+            self.My_op.par[f'Lightcolor{light_digit}r'].eval(),
+            self.My_op.par[f'Lightcolor{light_digit}g'].eval(),
+            self.My_op.par[f'Lightcolor{light_digit}b'].eval()
+            ]
+        on_state = self.My_op.par[f'Lightpwr{light_digit}'].eval()
+        brightness = self.My_op.par[f'Lightbri{light_digit}'].eval()
+        self.Controller.Update_light(light_id, rgb, on_state, brightness)
