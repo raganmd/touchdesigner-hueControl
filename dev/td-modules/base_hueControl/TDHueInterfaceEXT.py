@@ -22,6 +22,7 @@ class TDHueInterface:
     '''
 
     DEBUG = True
+    Version = '1.1.0'
 
     def __init__(self, my_op:callable) -> None:
 
