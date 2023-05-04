@@ -35,7 +35,7 @@ You'll need to enter the IP address of your Hue Bridge in the `Bridge IP` custom
 
 ## Parameters
 
-![admin-page](assets/admin.png)
+![admin-page](assets/admin-page.png)
 
 **Initialize Lights** - this parameter will retrieve the dictionary of lights that are currently configured on the Hue Bridge. This will then loop through all of the lights provided by the Bridge and create unique parameters for each light. Specifically it will create pars for:  
 * Color
