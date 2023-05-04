@@ -4,115 +4,60 @@
 [zoe sandoval](https://zoesandoval.com)
 
 ## TouchDesigner Version
-* 099 2018.26750
+* 099 2023.32660
 
 ## OS Support
 * Windows 10
-* macOS
-
-## Dependencies
-* [phue](https://github.com/studioimaginaire/phue)
+* macOS (currently untested)
 
 ## Summary
-Philips Hue smart lights are intended to be used in homes / studios. The devices come in many varieties - individual lamps, outdoor lights, LED strip lights, etc. These are synchronized by communicating with an additional device called a Bridge. A single Bridge can control up to 50 lights. There are many stand alone applications to drive Hue Lights, and this repo aims to provide some additional control by exposing those controls through TouchDesigner. In order to do this, we use the `phue` library. There is some additional set-up required in order to use an external library, though hopefully much of this is now streamlined.
+Philips Hue smart lights are intended to be used in homes / studios. The devices come in many varieties - individual lamps, outdoor lights, LED strip lights, etc. These are synchronized by communicating with an additional device called a Bridge. A single Bridge can control up to 50 lights. There are many stand alone applications to drive Hue Lights, and this repo aims to provide some additional control by exposing those controls through TouchDesigner. Previously this was addressed by using the `phue` library - this caused number of challenges for TouchDesigner users looking to install a 3rd party library. In this most recent update, the control mechanics have been changed to work with the latest hue api, and have moved to using just the `requests` library that ships with TouchDesigner.
 
 This TOX provides global control for all lights, or individual control for single lights.
 
-## Set-up
-This module module has some additional requirements in the from of dependencies, as well as some set-up requirements for working with hue devices. To begin we need to ensure that we've collected all of the requisite external dependencies
+## Use and Installation
+The steps below cover a typical installation and use of the `hueControl` TOX.
 
-### Install Python3
-Ensure that you've installed a `Python 3.9` variety.
+1. Download the `hueControl` TOX file from the releases page of this repository. Drop the TOX into your network. 
+2. Locate and add your bridge IP address - input this IP address into the `Bridgeip` parameter for the TOX.
+3. Click the `Link to Bridge` parameter on the TOX. This will prompt you to click the link button on your birdge before clicking `Continue` in TouchDesigner.
+4. Click `Initialize Lights` to fetch a list of all of the lights currently configured with your Hue Bridge.
+5. Update and control your Hue Lights.
 
-### Installing Dependencies for Windows Users
-For Window's users a convenience script is provided here:  
-`\dev\dep\update-dep-python-windows.cmd`  
-In order for this to operate correctly, right click and run this `.cmd` file as an Administrator. This should first ensure that your python package manager is updated, and that your additional python modules are added to a newly created directory in your project `dependencies\python`. 
+----
 
-### Installing Dependencies for macOS Users
-For Mac users a convenience script is provided here:  
-`\dev\dep\update-dep-python-mac.sh`  
-In order for this to operate correctly, open a terminal window and drag the file above into the command line. Press return / Enter to run the bash script. This should first ensure that your python package manager is updated, and that your additional python modules are added to a newly created directory in your project `dependencies\python`. 
-
-### Connecting to the Hue Bridge
+## Connecting to the Hue Bridge
 Before being able to control lights you'll need to ensure that you can connect to your Hue Bridge. You'll need to know the IP address for your Hue Bridge. You can locate this IP address by looking at the Hue app on your phone, or by setting your Bridge to have an assigned IP on your router.
 
-You'll need to enter the IP address of your Hue Bridge onto the component itself, and then press the large center button on the Hue Bridge. After doing this you'll need to pulse the `Set-up Individual Lights` button on the `base_hueControl` TOX.
+You'll need to enter the IP address of your Hue Bridge in the `Bridge IP` custom parameter. After entering this address. You'll next click on `Initialize Lights`. This will begin the process of linking to your Bridge - a TouchDesigner pop up window will appear with additional Instructions:
+
+![admin-page](assets/link-to-bridge.PNG)
 
 ## Parameters
 
-### Hue Admin
 ![admin-page](assets/admin.PNG)
 
-#### Set-up Individual Lights
-This parameter will retrieve the dictionary of lights that are currently configured on the Hue Bridge. This will then loop through all of the lights provided by the Bridge and create unique parameters for each light. Specifically it will create pars for:  
+**Initialize Lights** - this parameter will retrieve the dictionary of lights that are currently configured on the Hue Bridge. This will then loop through all of the lights provided by the Bridge and create unique parameters for each light. Specifically it will create pars for:  
 * Color
 * Brightness
-* Transition Time
 * Power
-* Pulse to Update
 
 This gives the user the ability to control each light individual - constructing parameters for each light currently configured on a given bridge. 
 
-#### Bridge IP
-The IP address for the Hue Bridge - this is used for communicating with the lights by way of the Hue Bridge.
+**Link to Bridge** - this parameter will begin the process of linking TouchDesigner to your Hue Bridge. This process requires that you Bridge IP is entered into the corresponding custom parameter. When you link to your Hue Bridge, the Device User Name is fetched and stored in a read-only custom parameter, as well as a unique Client Key that is only used by TouchDesigner to control your lights. If these parameters are not set, you need to pulse the `Link to Bridge` parameter.  
 
-#### Use Threads
-Python operations can sometimes be blocking - meaning that it causes touch to stop responding. By moving to threaded approach we can achieve a result where we can ensure that we don't totally stall. Lights can sometimes run slightly out of sequence when using threads, though in some cases this is well worth the fact that touch wont completely stall. 
+**Bridge IP** - The IP address for your Hue Bridge.  
 
-#### All Lights
-![all-lights](assets/all-lights.PNG)
+**Device User Name** - A user name generated by the Hue api for connecting to the Hue Bridge. This is generated when linking to the Hue Bridge.   
 
-#### All Color
-This color will be sent to all lights - you can think of this as a global color control. Color is expressed as normalized range of 0-1, with red, green, and blue channels.
-
-#### All Brightness
-Similar to color, this is the brightness control for all lights. This is expressed in a range of 0-1.
-
-#### All Trans Time
-This is the time between the issued command the settings sent to the light. This is expressed in seconds. If you enter a value of 0, the instructions will be sent immediately, though this often produces results that are stuttered.
-
-#### All Power
-This is the power command, the equivalent of "on" and "off".
-
-#### Update All
-After changing the settings for lights, you use this pulse button to send commands to the lights. This ensures that you can set the parameters before issuing a command to the lights. 
-
-### Hue Admin
-![individual-lights](assets/individual-lights.PNG)
-
-#### Update by Settings
-This pulse button is on the top of the Individual Lighting control page. Unlike a global control, this will send instructions for the configuration of lights based on what's set ont this page - this in effect lets you send unique settings to each light.
-
-#### Light n Name
-This is a read only parameter that is the Name for a given light that the user has configured in one of the Hue Apps.
-
-#### Light n Color
-The color to send to a given light. Color is expressed as normalized range of 0-1, with red, green, and blue channels.
-
-#### Light n Brightness
-Similar to color, this is the brightness control a given light. This is expressed in a range of 0-1.
-
-#### Light n Trans Time
-This is the time between the issued command the settings sent to the light. This is expressed in seconds. If you enter a value of 0, the instructions will be sent immediately.
-
-#### Light n Power
-This is the power command, the equivalent of "on" and "off".
-
-#### Update n Light
-After changing the settings for a given light, you use this pulse button to send commands to the light. This ensures that you can set the parameters before issuing a command. 
+**Client Key** - A client key generated by the Hue api for connecting to the Hue Bridge. This is generated when linking to the Hue Bridge.  
 
 ## Known Issues
 ### mac OS
-* scripting to pull python dependencies is still misbehaving. Currently, you'll need to set the permissions on this file manually in order to get it to run correctly. You can do this in terminal by doing the following:
-    * open a terminal window
-    * navigate in terminal to the `dep` directory
-    * use the following command `sudo chmod 755 udpate-dep-python-mac.sh`
-    * enter your password
-    * drag `udpate-dep-python-mac.sh` file into terminal and hit enter
+* none... yet
 
 ## Windows
-* none that I know of... yet
+* none... yet
 
 ## Credits
 ### Inspired by the work of:

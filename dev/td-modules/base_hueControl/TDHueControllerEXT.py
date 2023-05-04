@@ -27,7 +27,10 @@ class TDHueController:
     def __init__(self, myOp:OP) -> None:
         urllib3.disable_warnings()
         self.My_op = myOp
+
         self.Bridge_ip = myOp.par.Bridgeip
+        self._ready_to_connect = False
+        self._check_bridge()
 
         self.Gamma = None
         self.X_vals	= None
@@ -39,16 +42,19 @@ class TDHueController:
 
         self.My_bridge = None
 
-        self.Use_threads  = myOp.par.Usethreads
+        #TODO - add threaded support for requests
+        # self.Use_threads  = myOp.par.Usethreads
 
         self._all_lights = None
 
         # runs additional setup to get par vals
         self._setup()
 
-        self._get_lights()
-
-        print("💡 TDHue Controller Init")
+        if self._ready_to_connect:
+            self._get_lights()
+            print("💡 TDHue Controller Init")
+        else:
+            pass
         return
 
 
@@ -73,21 +79,30 @@ class TDHueController:
         return hue_headers
 
     def _setup(self) -> None:
-        self.Gamma = self.My_op.par.Gamma.eval()
+        self.Gamma = ipar.Conversion.Gamma.eval()
         self.X_vals = (
-            self.My_op.par.Xvals1.eval(), 
-            self.My_op.par.Xvals2.eval(), 
-            self.My_op.par.Xvals3.eval())
+            ipar.Conversion.Xvals1.eval(), 
+            ipar.Conversion.Xvals2.eval(), 
+            ipar.Conversion.Xvals3.eval())
         
         self.Y_vals = (
-            self.My_op.par.Yvals1.eval(), 
-            self.My_op.par.Yvals2.eval(), 
-            self.My_op.par.Yvals3.eval())
+            ipar.Conversion.Yvals1.eval(), 
+            ipar.Conversion.Yvals2.eval(), 
+            ipar.Conversion.Yvals3.eval())
         
         self.Z_vals = (
-            self.My_op.par.Zvals1.eval(), 
-            self.My_op.par.Zvals2.eval(), 
-            self.My_op.par.Zvals3.eval())
+            ipar.Conversion.Zvals1.eval(), 
+            ipar.Conversion.Zvals2.eval(), 
+            ipar.Conversion.Zvals3.eval())
+
+    def _check_bridge(self) -> None:
+        device_user_name = self.My_op.par.Deviceusername.eval()
+        client_key = self.My_op.par.Clientkey.eval()
+        if device_user_name == '' or client_key == '':
+            print('NO BRIDGE CONFIGURED')
+            self._ready_to_connect = False
+        else:
+            self._ready_to_connect = True
 
     def _bridge_setup(self) -> list:
         '''Runs set-up functions to connect with bridge
@@ -119,7 +134,7 @@ class TDHueController:
             raise Exception(f"💡 Message from Hue | {set_up_msg}")
         
 
-    def _get_lights(self) -> dict:
+    def _get_lights(self) -> dict:            
         # print(self._hue_headers)
         all_lights = requests.get(self._lights_address, data ={}, headers=self._hue_headers, verify=False)
         all_lights_json = all_lights.json().get("data")
@@ -265,12 +280,13 @@ class TDHueController:
         # set with current brightness
         self.My_op.par[bri_name] = brightness
 
+        # TODO - thoughtful addition of control with transition time
         # add a transition time control par
-        tri_name = f'Lighttrans{index}'
-        tri_label = f'Light {index} Trans Time'
-        new_transTime = lights_page.appendInt(tri_name, label=tri_label)
-        new_transTime.default = default_transTime        
-        self.My_op.par[tri_name] = default_transTime
+        # tri_name = f'Lighttrans{index}'
+        # tri_label = f'Light {index} Trans Time'
+        # new_transTime = lights_page.appendInt(tri_name, label=tri_label)
+        # new_transTime.default = default_transTime        
+        # self.My_op.par[tri_name] = default_transTime
 
         # add a power control par
         pwr_name =f'Lightpwr{index}'
@@ -280,10 +296,11 @@ class TDHueController:
         # set with current state
         self.My_op.par[pwr_name] = on_state
 
+        # TODO - thoughtful addition of an update button
         # add an update pulse button
-        update_name = f'Updatelight{index}'
-        update_label = f'Update {index} Light'
-        lights_page.appendPulse(update_name, label=update_label)
+        # update_name = f'Updatelight{index}'
+        # update_label = f'Update {index} Light'
+        # lights_page.appendPulse(update_name, label=update_label)
 
         # set string name for lights based on Hue
         self.My_op.par[f'Lightname{index}'] = metadata.get("name")
