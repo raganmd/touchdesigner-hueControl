@@ -21,7 +21,7 @@ class TDHueInterface:
     To see all debug messages change the DEBUG member to True
     '''
 
-    DEBUG = True
+    DEBUG = False
     Version = '1.1.0'
 
     def __init__(self, my_op:callable) -> None:
@@ -51,6 +51,7 @@ class TDHueInterface:
     # NOTE Pars
     def Initializelights(self, par:callable) -> None:
         # Pulse par
+        self.Controller.Clear_and_setup_lights()
         print(f"running {par.name}")
 
     def Linktobridge(self, par:callable) -> None:
