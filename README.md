@@ -18,9 +18,10 @@ This TOX provides global control for all lights, or individual control for singl
 ## Use and Installation
 The steps below cover a typical installation and use of the `hueControl` TOX.
 
-1. Download the `hueControl` TOX file from the releases page of this repository. Drop the TOX into your network. 
+1. Download the `hueControl` TOX file from the [releases page of this repository](https://github.com/raganmd/touchdesigner-hueControl/releases). Be sure to download the `TDHueControl.tox
+`. Drop the TOX into your network. 
 2. Locate and add your bridge IP address - input this IP address into the `Bridgeip` parameter for the TOX.
-3. Click the `Link to Bridge` parameter on the TOX. This will prompt you to click the link button on your birdge before clicking `Continue` in TouchDesigner.
+3. Click the `Link to Bridge` parameter on the TOX. This will prompt you to click the link button on your bridge before clicking `Continue` in TouchDesigner.
 4. Click `Initialize Lights` to fetch a list of all of the lights currently configured with your Hue Bridge.
 5. Update and control your Hue Lights.
 
