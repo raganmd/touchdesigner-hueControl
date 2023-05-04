@@ -31,11 +31,11 @@ Before being able to control lights you'll need to ensure that you can connect t
 
 You'll need to enter the IP address of your Hue Bridge in the `Bridge IP` custom parameter. After entering this address. You'll next click on `Initialize Lights`. This will begin the process of linking to your Bridge - a TouchDesigner pop up window will appear with additional Instructions:
 
-![admin-page](assets/link-to-bridge.PNG)
+![admin-page](assets/link-to-bridge.png)
 
 ## Parameters
 
-![admin-page](assets/admin.PNG)
+![admin-page](assets/admin.png)
 
 **Initialize Lights** - this parameter will retrieve the dictionary of lights that are currently configured on the Hue Bridge. This will then loop through all of the lights provided by the Bridge and create unique parameters for each light. Specifically it will create pars for:  
 * Color
