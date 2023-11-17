@@ -10,6 +10,7 @@ import requests
 import TDFunctions
 import urllib3
 
+
 class TDHueController:
     '''
     TDHueController is intended to construct and send web
@@ -24,7 +25,7 @@ class TDHueController:
     N/A
     '''
 
-    def __init__(self, myOp:OP) -> None:
+    def __init__(self, myOp: OP) -> None:
         urllib3.disable_warnings()
         self.My_op = myOp
 
@@ -33,16 +34,16 @@ class TDHueController:
         self._check_bridge()
 
         self.Gamma = None
-        self.X_vals	= None
+        self.X_vals = None
         self.Y_vals = None
-        self.Z_vals	= None
+        self.Z_vals = None
 
         self.Lights_page_name = "Individual Lights"
         self.Trans_time_scaler = 10
 
         self.My_bridge = None
 
-        #TODO - add threaded support for requests
+        # TODO - add threaded support for requests
         # self.Use_threads  = myOp.par.Usethreads
 
         self._all_lights = None
@@ -56,7 +57,6 @@ class TDHueController:
         else:
             pass
         return
-
 
     @property
     def _bridge_address(self) -> str:
@@ -73,26 +73,26 @@ class TDHueController:
     @property
     def _hue_headers(self) -> dict:
         hue_headers = {
-            "hue-application-key":self.My_op.par.Deviceusername.eval(), 
+            "hue-application-key": self.My_op.par.Deviceusername.eval(),
             "Accept": "*/*",
-            "Host" : "10.0.1.60"}
+            "Host": "10.0.1.60"}
         return hue_headers
 
     def _setup(self) -> None:
         self.Gamma = ipar.Conversion.Gamma.eval()
         self.X_vals = (
-            ipar.Conversion.Xvals1.eval(), 
-            ipar.Conversion.Xvals2.eval(), 
+            ipar.Conversion.Xvals1.eval(),
+            ipar.Conversion.Xvals2.eval(),
             ipar.Conversion.Xvals3.eval())
-        
+
         self.Y_vals = (
-            ipar.Conversion.Yvals1.eval(), 
-            ipar.Conversion.Yvals2.eval(), 
+            ipar.Conversion.Yvals1.eval(),
+            ipar.Conversion.Yvals2.eval(),
             ipar.Conversion.Yvals3.eval())
-        
+
         self.Z_vals = (
-            ipar.Conversion.Zvals1.eval(), 
-            ipar.Conversion.Zvals2.eval(), 
+            ipar.Conversion.Zvals1.eval(),
+            ipar.Conversion.Zvals2.eval(),
             ipar.Conversion.Zvals3.eval())
 
     def _check_bridge(self) -> None:
@@ -109,12 +109,12 @@ class TDHueController:
         '''
         api_address = self._api_address
         payload = {
-            "devicetype": "TouchDesigner", 
-            "generateclientkey":True
-            }
+            "devicetype": "TouchDesigner",
+            "generateclientkey": True
+        }
 
         set_up_msg = requests.post(api_address, json=payload, verify=False)
-        
+
         if set_up_msg.status_code == 200:
             json_blob = set_up_msg.json()
 
@@ -126,23 +126,22 @@ class TDHueController:
 
                 self.My_op.par.Deviceusername = user_name
                 self.My_op.par.Clientkey = application_key
-            
+
             except Exception as e:
                 raise Exception(f"💡 Message from Hue | {e}")
 
         else:
             raise Exception(f"💡 Message from Hue | {set_up_msg}")
-        
 
-    def _get_lights(self) -> dict:            
+    def _get_lights(self) -> dict:
         # print(self._hue_headers)
-        all_lights = requests.get(self._lights_address, data ={}, headers=self._hue_headers, verify=False)
+        all_lights = requests.get(
+            self._lights_address, data={}, headers=self._hue_headers, verify=False)
         all_lights_json = all_lights.json().get("data")
-        
+
         self._all_lights = all_lights_json
 
         return all_lights_json
-
 
     def Clear_and_setup_lights(self):
         '''
@@ -171,7 +170,6 @@ class TDHueController:
         # # wait 1 second and add new pars
         delay_add_pars = "args[0].Add_pars_for_lights()"
         run(delay_add_pars, self, delayFrames=60)
-
 
     def Clear_hue_lights(self):
         '''
@@ -227,26 +225,28 @@ class TDHueController:
         # add update all pulse:
         lights_page.appendPulse('Updatebysettings', label='Update by Settings')
 
-        self._get_lights() 
+        self._get_lights()
         all_lights = self._all_lights
 
         for each_index, each_light in enumerate(all_lights):
             self._add_light_pars(each_index, each_light)
 
-    def _add_light_pars(self, index:int, light_info:dict) -> None:
+    def _add_light_pars(self, index: int, light_info: dict) -> None:
         metadata = light_info.get('metadata')
         brightness = light_info.get('dimming').get('brightness') / 100
         color = light_info.get('color').get('xy')
         on_state = light_info.get('on').get('on')
 
-        rgb_color = self._convert_xy_to_rgb(color.get('x'), color.get('y'), brightness)
+        rgb_color = self._convert_xy_to_rgb(
+            color.get('x'), color.get('y'), brightness)
 
         default_color = [1.0, 1.0, 1.0]
-        default_bri	= 1
+        default_bri = 1
         default_transTime = 3
         default_pwr = False
 
-        lights_page = TDFunctions.getCustomPage(self.My_op, "Individual Lights")
+        lights_page = TDFunctions.getCustomPage(
+            self.My_op, "Individual Lights")
 
         # add the string name of the light
         str_name = f'Lightname{index}'
@@ -256,7 +256,8 @@ class TDHueController:
         # add id of light
         light_id_name = f'Lightid{index}'
         light_id_label = f'Light {index} ID'
-        par_light_id = lights_page.appendStr(light_id_name, label=light_id_label)
+        par_light_id = lights_page.appendStr(
+            light_id_name, label=light_id_label)
         par_light_id.val = light_info.get("id")
         par_light_id.readOnly = True
 
@@ -264,9 +265,9 @@ class TDHueController:
         rgb_name = f'Lightcolor{index}'
         rbg_label = f'Light {index} Color'
         new_color = lights_page.appendRGB(rgb_name, label=rbg_label)
-        
+
         for each in new_color:
-            each.default 	= 1.0
+            each.default = 1.0
 
         self.My_op.par[f'Lightcolor{index}r'] = rgb_color[0]
         self.My_op.par[f'Lightcolor{index}g'] = rgb_color[1]
@@ -285,12 +286,12 @@ class TDHueController:
         # tri_name = f'Lighttrans{index}'
         # tri_label = f'Light {index} Trans Time'
         # new_transTime = lights_page.appendInt(tri_name, label=tri_label)
-        # new_transTime.default = default_transTime        
+        # new_transTime.default = default_transTime
         # self.My_op.par[tri_name] = default_transTime
 
         # add a power control par
-        pwr_name =f'Lightpwr{index}'
-        pwr_label =f'Light {index} Power'
+        pwr_name = f'Lightpwr{index}'
+        pwr_label = f'Light {index} Power'
         new_pwr = lights_page.appendToggle(pwr_name, label=pwr_label)
         new_pwr.default = default_pwr
         # set with current state
@@ -311,43 +312,56 @@ class TDHueController:
         # add section divider
         self.My_op.par[f'Lightname{index}'].startSection = True
 
-    def Update_light(self, light_id:str, rgb:list, on_state:bool, brightness:float) -> callable:
+    def Update_light(self, light_id: str, rgb: list, on_state: bool, brightness: float) -> None:
         update_request = self._update_single_light(
-            light_id, 
-            rgb, 
-            on_state, 
+            light_id,
+            rgb,
+            on_state,
             brightness * 100)
 
-        return update_request
-        
-    def _update_single_light(self, light_id:str, rgb:tuple, on_state:bool, brightness:int) -> callable:
+        return
 
+    def _update_single_light(self, light_id: str, rgb: tuple, on_state: bool, brightness: int) -> None:
+        """
+        """
         xy_color = self._convert_color(rgb)
-        light_params = { 
-            "color" : {
-                "xy" : {
-                    "x" : xy_color[0],  
-                    "y" : xy_color[1]
+        light_params = {
+            "color": {
+                "xy": {
+                    "x": xy_color[0],
+                    "y": xy_color[1]
                 }
             },
-            "on" : {
-                "on" : on_state
+            "on": {
+                "on": on_state
             },
-            "dimming" : {
-                "brightness" : brightness
+            "dimming": {
+                "brightness": brightness
             }
         }
         light_url = f"{self._lights_address}/{light_id}"
         payload = json.dumps(light_params)
+
+        # update_thread = threading.Thread(
+        #     target=requests.put,
+        #     args=(light_url,),
+        #     kwargs={
+        #         "headers": self._hue_headers,
+        #         "data": payload,
+        #         "verify": False
+        #     }
+        # )
+        # update_thread.start()
+
         light_put_request = requests.put(
-            light_url, 
-            headers=self._hue_headers, 
+            light_url,
+            headers=self._hue_headers,
             data=payload,
             verify=False)
 
-        return light_put_request
+        return
 
-    def _convert_color(self, rgb:tuple) -> list:
+    def _convert_color(self, rgb: tuple) -> list:
         '''
             A hue color conversion method.
 
@@ -375,16 +389,19 @@ class TDHueController:
         '''
 
         if sum(rgb) == 0:
-            rgb 	= [0.001, 0.001, 0.001]
+            rgb = [0.001, 0.001, 0.001]
         else:
             pass
 
-        gamma 				= self.Gamma
-        g_correction 		= [pow(each_chan, (1/gamma)) for each_chan in rgb]
+        gamma = self.Gamma
+        g_correction = [pow(each_chan, (1/gamma)) for each_chan in rgb]
 
-        color_X = g_correction[0] * self.X_vals[0] + g_correction[1] * self.X_vals[1] + g_correction[2] * self.X_vals[2]
-        color_Y = g_correction[0] * self.Y_vals[0] + g_correction[1] * self.Y_vals[1] + g_correction[2] * self.Y_vals[2]
-        color_Z = g_correction[0] * self.Z_vals[0] + g_correction[1] * self.Z_vals[1] + g_correction[2] * self.Z_vals[2]
+        color_X = g_correction[0] * self.X_vals[0] + g_correction[1] * \
+            self.X_vals[1] + g_correction[2] * self.X_vals[2]
+        color_Y = g_correction[0] * self.Y_vals[0] + g_correction[1] * \
+            self.Y_vals[1] + g_correction[2] * self.Y_vals[2]
+        color_Z = g_correction[0] * self.Z_vals[0] + g_correction[1] * \
+            self.Z_vals[1] + g_correction[2] * self.Z_vals[2]
 
         color_x = color_X / (color_X + color_Y + color_Z)
         color_y = color_Y / (color_X + color_Y + color_Z)
@@ -392,17 +409,17 @@ class TDHueController:
         color_xy = [color_x, color_y]
 
         return color_xy
-    
-    def _convert_xy_to_rgb(self, x:float, y:float, brightness:float) -> list:
+
+    def _convert_xy_to_rgb(self, x: float, y: float, brightness: float) -> list:
 
         z = 1.0 - x - y
 
         Y = 0.75
         X = (Y / y) * x
-        Z = (Y / y) * z 
-        
-        r = X  * 1.612 - Y * 0.203 - Z * 0.302 
+        Z = (Y / y) * z
+
+        r = X * 1.612 - Y * 0.203 - Z * 0.302
         g = -X * 0.509 + Y * 1.412 + Z * 0.066
-        b = X  * 0.026 - Y * 0.072 + Z * 0.962
+        b = X * 0.026 - Y * 0.072 + Z * 0.962
 
         return [r, g, b]
