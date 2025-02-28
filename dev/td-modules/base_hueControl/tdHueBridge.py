@@ -2,6 +2,8 @@ import argparse
 import socket
 import json
 import datetime
+import requests
+import urllib3
 
 # create arg parser for CLI args
 parser = argparse.ArgumentParser()
@@ -24,6 +26,8 @@ args = parser.parse_args()
 
 udp_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp_client.bind((args.a, args.p))
+
+urllib3.disable_warnings()
 
 start_up_banner = '''
  _________    __ ____  ______
@@ -53,6 +57,17 @@ def log_msg(payload: dict) -> None:
     print(output_msg)
 
 
+def update_single_light(payload: dict) -> None:
+
+    output_msg = f'{get_now()} | updating {payload.get("light_url")}'
+    update_request = requests.put(
+        payload.get("light_url"),
+        headers=payload.get("headers"),
+        data=json.dumps(payload.get("data")),
+        verify=payload.get("verify"))
+    print(output_msg)
+
+
 def quit_python(payload: dict) -> None:
     """Quits python shell application
     """
@@ -62,7 +77,8 @@ def quit_python(payload: dict) -> None:
 def parse_msg(msg: dict) -> None:
     command_map = {
         "log": log_msg,
-        "quit": quit_python
+        "quit": quit_python,
+        "update_single_light": update_single_light
     }
 
     try:
@@ -75,6 +91,7 @@ def parse_msg(msg: dict) -> None:
 
 print(start_up_banner)
 print("\nSTARTING TouchDesigner -> Hue Python Bridge\n")
+print(f"listening on {args.a} {args.p}\n")
 
 while True:
     data, addr = udp_client.recvfrom(1024)

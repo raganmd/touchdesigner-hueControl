@@ -4,7 +4,6 @@ Zoe Sandoval | zoesandoval.com
 '''
 
 import sys
-import threading
 import json
 import requests
 import TDFunctions
@@ -43,16 +42,20 @@ class TDHueController:
 
         self.My_bridge = None
 
+        self._udp_out_DAT = op("udpout_toPythonShell")
+
         # TODO - add threaded support for requests
         # self.Use_threads  = myOp.par.Usethreads
 
         self._all_lights = None
+        self._entertainment_areas = None
 
         # runs additional setup to get par vals
         self._setup()
 
         if self._ready_to_connect:
             self._get_lights()
+            self._get_entertainment_areas()
             print("💡 TDHue Controller Init")
         else:
             pass
@@ -69,6 +72,10 @@ class TDHueController:
     @property
     def _lights_address(self) -> str:
         return f"{self._bridge_address}/clip/v2/resource/light"
+
+    @property
+    def _entertainment_address(self) -> str:
+        return f"{self._bridge_address}/clip/v2/resource/entertainment_configuration"
 
     @property
     def _hue_headers(self) -> dict:
@@ -142,6 +149,15 @@ class TDHueController:
         self._all_lights = all_lights_json
 
         return all_lights_json
+
+    def _get_entertainment_areas(self) -> dict:
+        entertainment_areas = requests.get(
+            self._entertainment_address, data={}, headers=self._hue_headers, verify=False)
+        entertainment_areas_json = entertainment_areas.json().get("data")
+
+        self._entertainment_areas = entertainment_areas_json
+
+        return entertainment_areas_json
 
     def Clear_and_setup_lights(self):
         '''
@@ -342,24 +358,47 @@ class TDHueController:
         light_url = f"{self._lights_address}/{light_id}"
         payload = json.dumps(light_params)
 
-        # update_thread = threading.Thread(
-        #     target=requests.put,
-        #     args=(light_url,),
-        #     kwargs={
-        #         "headers": self._hue_headers,
-        #         "data": payload,
-        #         "verify": False
-        #     }
-        # )
-        # update_thread.start()
+        # send control message to open python shell
+        self._send_to_python_shell(light_url, light_params)
 
-        light_put_request = requests.put(
-            light_url,
-            headers=self._hue_headers,
-            data=payload,
-            verify=False)
+        # control to Hue from TD
+        # light_put_request = requests.put(
+        #     light_url,
+        #     headers=self._hue_headers,
+        #     data=payload,
+        #     verify=False)
 
         return
+
+    def _send_to_python_shell(self, light_url: str, payload: dict):
+
+        msg = {
+            "command": "update_single_light",
+            "payload": {
+                "light_url": light_url,
+                "headers": self._hue_headers,
+                "data": payload,
+                "verify": False
+            }
+        }
+        self._udp_out_DAT.send(json.dumps(msg), terminator='\r\n')
+
+    def _start_entertainment_stream(self, area_id: str) -> None:
+        entertainment_url = f"{self._entertainment_address}/{area_id}"
+        data = {"action": "start"}
+        go_live_request = requests.put(
+            entertainment_url,
+            headers=self._hue_headers,
+            data=json.dumps(data),
+            verify=False
+        )
+
+        # report to the textport any error that may have occured
+        if go_live_request.status_code == 400:
+            print(f"Message from HUE | {go_live_request.text}")
+        else:
+            pass
+        return go_live_request
 
     def _convert_color(self, rgb: tuple) -> list:
         '''
