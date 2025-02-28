@@ -1,4 +1,11 @@
+# WE'RE MOVING... just to another repo
+
+A huge thank you to everyone who has supported this project and been interested in its development over the years. Since I started SudoMagic with two other wonder people we've started mapping out new and reliable workflows for sharing TOX files. For that reason this repo is moving just around the corner. It'll continue to be free, it's just easier for me to manage it's update cycle in a slightly different place. You can find the new repo for this here: [td-hueControl](https://github.com/SudoMagicCode/td-hueControl) 
+
+It's the same project you already know, just in a place that's easier for me to manage. See you in the other repo - happy programming!
+
 # TouchDesigner Hue Control
+
 *a tox for controlling phillips hue devices*  
 [matthew ragan](https://matthewragan.com)  
 [zoe sandoval](https://zoesandoval.com)
